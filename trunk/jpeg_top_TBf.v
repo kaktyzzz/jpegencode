@@ -126,13 +126,13 @@ end
 always 	@(JPEG_bitstream or data_ready)
 begin : JPEG
 		if (data_ready==1'b1) 	begin	//изменил, чтобы не выводились нули
-					//$writeh(JPEG_bitstream);	
-					temp_write[7:0] = JPEG_bitstream[31:24];
-					temp_write[15:8] = JPEG_bitstream[23:16];
-					temp_write[23:16] = JPEG_bitstream[15:8];
-					temp_write[31:24] = JPEG_bitstream[7:0];
-					$fwrite(output_file, "%u", temp_write);					
-					//$display("%h", JPEG_bitstream);	
+			//$writeh(JPEG_bitstream);	
+			temp_write[7:0] = JPEG_bitstream[31:24];
+			temp_write[15:8] = JPEG_bitstream[23:16];
+			temp_write[23:16] = JPEG_bitstream[15:8];
+			temp_write[31:24] = JPEG_bitstream[7:0];
+			$fwrite(output_file, "%u", temp_write);					
+			//$display("%h", JPEG_bitstream);	
 		end
 end	
 
