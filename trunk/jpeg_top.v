@@ -73,8 +73,8 @@ wire [4:0] orc_reg_in;
  
 initial
 begin : HEADER
- #10 $write("ffd8fffe00043a29");
- #60 $write("ffda000c03010002110311003f00"); //последняя секция 
+ /*#10 $write("ffd8fffe00043a29");
+ #60 $write("ffda000c03010002110311003f00"); //последняя секция */
 end
 
 endmodule

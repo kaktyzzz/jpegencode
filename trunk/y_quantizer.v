@@ -310,7 +310,7 @@ integer Z81_int, Z82_int, Z83_int, Z84_int, Z85_int, Z86_int, Z87_int, Z88_int;
 
 initial
 begin : HEADER
- #20 $write("ffdb004300");
+ /*#20 $write("ffdb004300");
  $writeh(Q1_1,
 			Q1_2,
 			Q1_3,
@@ -376,7 +376,7 @@ begin : HEADER
 			Q8_7,
 			Q8_8
 		);
-
+*/
 end
 
 always @(posedge clk)
