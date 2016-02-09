@@ -50,6 +50,8 @@ wire [4:0]end_of_file_bitstream_count;
 wire eof_data_partial_ready;
 
 reg [31:0]temp_write;
+reg [23:0]read_data;
+reg enable_read_file;
 
 integer output_file;
 integer input_file;
@@ -76,33 +78,36 @@ initial
 begin : STIMUL 
 	output_file = $fopen("out.jpg","wb");
 	input_file = $fopen("../../input.txt", "r"); //file contains block 8*8 RGB, row first
-	if (input_file == `NULL) begin
-		$display("File not found!");
-		$finish;
-	end
-	#1000;
+	if (input_file == `NULL) 
+		begin
+			$display("File not found!");
+			$finish;
+		end
 	rst = 1'b1;
 	enable = 1'b0;
 	end_of_file_signal = 1'b0;
+	enable_read_file = 1'b1;
     #10000; 
 	rst = 1'b0;
 	enable = 1'b1;
 	// data_in holds the red, green, and blue pixel values
 	// obtained from the .tif image file
 	c <= 0;
-    while (!$feof(input_file)) begin
-		line = $fscanf(input_file, "%h\n", data_in);
-		#10000;
-		//$display("%b", data_in);
-		c = c + 1;
-		if (c == 64) begin
-			c <= 0;
-			#130000;
-			enable <= 1'b0;
+    /*while (!$feof(input_file)) 
+		begin
+			line = $fscanf(input_file, "%h\n", data_in);
 			#10000;
-			enable <= 1'b1;
+			//$display("%b", data_in);
+			c = c + 1;
+			if (c == 64) 
+				begin
+					c <= 0;
+					#130000;
+					enable <= 1'b0;
+					#10000;
+					enable <= 1'b1;
+				end
 		end
-	end
 	
 	enable <= 1'b0;
 	end_of_file_signal  <= 1'b1;
@@ -110,7 +115,7 @@ begin : STIMUL
 	
 	$fclose(output_file);
 	$fclose(input_file);
-	$finish;
+	$finish;*/
 end // end of stimulus process
 	
 always
@@ -123,9 +128,50 @@ begin : CLOCK_clk
 	#5000; //5000
 end
 
+always @(negedge clk)
+begin : send_data
+	if (enable) 
+		begin
+			data_in <= read_data;
+			c = c + 1;
+			if (c == 64) 
+				begin
+					enable_read_file <= 1'b0;
+					c <= 0;
+					#130000;
+					enable <= 1'b0;					
+					#10000;
+					enable <= 1'b1;
+					enable_read_file = 1'b1;
+				end
+		end
+end
+
+
+always @(posedge clk)
+begin : read_from_file
+	if (!$feof(input_file) ) 
+		begin
+			if (enable_read_file)
+				begin
+					line <= $fscanf(input_file, "%h\n", read_data);
+				end
+		end
+	else 
+		begin
+			enable <= 1'b0;
+			end_of_file_signal  <= 1'b1;
+			#3800000; //Очень аккуратное число!
+	
+			$fclose(output_file);
+			$fclose(input_file);
+			$finish;
+		end
+end
+
 always 	@(JPEG_bitstream or data_ready)
 begin : JPEG
-		if (data_ready==1'b1) 	begin	//изменил, чтобы не выводились нули
+		if (data_ready==1'b1) 	begin
 			//$writeh(JPEG_bitstream);	
 			temp_write[7:0] = JPEG_bitstream[31:24];
 			temp_write[15:8] = JPEG_bitstream[23:16];
